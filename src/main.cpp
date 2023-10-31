@@ -69,7 +69,6 @@ void setup() {
     printf("show image for array\r\n");
     Paint_SelectImage(BlackImage);
     Paint_Clear(WHITE);
-    // Paint_DrawBitMap(gImage_2in7);
     EPD_2IN7_V2_Display(BlackImage);
     DEV_Delay_ms(500);
 
@@ -85,7 +84,7 @@ void setup() {
 
 }
 
-//  TEMPERATURA CLASE
+//  Monitor CLASE
 float monitor(float steinhart) { // Función para leer la temperatura del termistor
   
   
