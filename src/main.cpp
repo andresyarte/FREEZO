@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include "Classes/TemperatureSensor.h"
 
 
 void setup_wifi(); // Función para conectarse a Wi-Fi
@@ -34,12 +35,13 @@ char msg[MSG_BUFFER_SIZE];            // Generar un arreglo para el mensaje
 
 WiFiClient espClient;
 PubSubClient client(espClient);
+TemperatureSensor sensor(20.0,30.0);
 
 void setup() {
   Serial.begin(9600);
-  setup_wifi();
-  client.setServer(mqtt_server, 1883);
-  client.setCallback(callback);
+  //setup_wifi();
+  //client.setServer(mqtt_server, 1883);
+  //client.setCallback(callback);
   //if (!client.connected()) {
   //reconnect();
   //}
@@ -67,7 +69,7 @@ void setup() {
     printf("show image for array\r\n");
     Paint_SelectImage(BlackImage);
     Paint_Clear(WHITE);
-    Paint_DrawBitMap(gImage_2in7);
+    // Paint_DrawBitMap(gImage_2in7);
     EPD_2IN7_V2_Display(BlackImage);
     DEV_Delay_ms(500);
 
@@ -83,9 +85,26 @@ void setup() {
 
 }
 
+//  TEMPERATURA CLASE
+float monitor(float steinhart) { // Función para leer la temperatura del termistor
+  
+  
+  // Actualizar la pantalla con el texto de la temperatura
+  EPD_2IN7_V2_Display_Base(BlackImage);
+  Paint_Clear(WHITE);
+  Paint_DrawString_EN(10, 0, "La temperatura actual es de:", &Font24, WHITE, BLACK);
+  char tempStr[10];
+  dtostrf(steinhart, 4, 2, tempStr);
+  Paint_DrawString_EN(85, 85, tempStr, &Font24, WHITE, BLACK);
+  Paint_DrawString_EN(170, 85, " C", &Font24, WHITE, BLACK);
+  Paint_DrawString_EN(0, 150, "30 de Octubre del 2023", &Font12, WHITE, BLACK);
+  return steinhart;
+}
+
 void loop() {
   float t;
-  t = readTemp();  // Leer la temperatura del sensor
+  t = sensor.readTemp(); 
+  monitor(t); // Leer la temperatura del sensor
   //if (!client.connected()) {
   //  reconnect();
   //}
@@ -95,6 +114,7 @@ void loop() {
   delay(10000);  // Esperar 5 segundos antes de leer la temperatura nuevamente
 }
 
+// WIFI & DATOS CLASE
 void setup_wifi() {
   WiFi.begin(ssid, password);
   Serial.print("\nConnecting");
@@ -110,7 +130,7 @@ void setup_wifi() {
     Serial.println(WiFi.localIP());
 }
 
-
+// MQTT CLASE
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
@@ -121,6 +141,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.println();
 }
 
+// MQTT CLASE
 void reconnect() { // Función para conectarse a MQTT
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection... ");
@@ -144,60 +165,4 @@ void reconnect() { // Función para conectarse a MQTT
       delay(5000);
     }
   }
-}
-
-float readTemp() { // Función para leer la temperatura del termistor
-  uint8_t i; // Definición de contador (entero de un byte sin signo).
-  float average;
- 
-  // Tomar N muestras y guardarlas en el arreglo con un pequeño delay
-  for (i = 0; i < NumSamples; i++) {
-   samples[i] = analogRead(ThermistorPin);
-   delay(10);
-  }
-
-  // Promediar las muestras
-  average = 0;
-  for (i = 0; i < NumSamples; i++) {
-     average += samples[i];
-  }
-  average /= NumSamples;
- 
-  Serial.print("Average analog reading "); 
-  Serial.println(average);
-
-  // Convertir el valor análogo a una resistencia
-  average = (4095 / average)  - 1;     // (4095 / ADC - 1). 4095 por tener un ADC de 12 bits (0-4095).
-  average = SeriesResistor / average;  // 10K / (4095 / ADC - 1)
-  Serial.print("Thermistor resistance "); 
-  Serial.print(average);
-  Serial.println(" ohms");
-  // Utilizar la ecuación simplificada del parámetro B para un termistor: 1/T = 1/T_0 + (1/B) * ln(R/R_0)
-    // T = temperatura medida [K]
-    // T_0 = temperatura nominal absoluta [K]
-    // B = parámetro beta del termistor [K]
-    // R = resistencia medida [ohms]
-    // R_0 = resistencia a la temperatura nominal [ohms]
-  float steinhart;
-  steinhart = average / ThermistorNominal;        // R/R_0
-  steinhart = log(steinhart);                     // ln(R/R_0)
-  steinhart /= BCoefficient;                      // 1/B * ln(R/R_0)
-  steinhart += 1.0 / (NominalTemp + 273.15);      // + (1/T_0)
-  steinhart = 1.0 / steinhart;                    // Invertir
-  steinhart -= 273.15;                            // Convertir temperatura absoluta [K] a Celsius [ºC]
-  
-  Serial.print("Temperature "); 
-  Serial.print(steinhart);
-  Serial.println(" ºC");
-  
-  // Actualizar la pantalla con el texto de la temperatura
-  EPD_2IN7_V2_Display_Base(BlackImage);
-  Paint_Clear(WHITE);
-  Paint_DrawString_EN(10, 0, "La temperatura actual es de:", &Font24, WHITE, BLACK);
-  char tempStr[10];
-  dtostrf(steinhart, 4, 2, tempStr);
-  Paint_DrawString_EN(85, 85, tempStr, &Font24, WHITE, BLACK);
-  Paint_DrawString_EN(170, 85, " C", &Font24, WHITE, BLACK);
-  Paint_DrawString_EN(0, 150, "30 de Octubre del 2023", &Font12, WHITE, BLACK);
-  return steinhart;
 }
