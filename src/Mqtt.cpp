@@ -47,5 +47,5 @@ void Mqtt::Mqtt_publish(float t){
 
 void Mqtt::Mqtt_setup(){
     client.setServer(mqtt_server, 1883);
-    client.setCallback(callback);
+    //client.setCallback(callback(topic,payload,length));
 }

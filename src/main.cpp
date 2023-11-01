@@ -6,7 +6,9 @@
 #include <stdlib.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
+
 #include "Classes/TemperatureSensor.h"
+#include "Mqtt.h"
 
 
 void setup_wifi(); // Función para conectarse a Wi-Fi
@@ -33,8 +35,8 @@ const char* topico_entrada = "equipoPATO";
 const int MSG_BUFFER_SIZE = 80;       // Tamaño de buffer del mensaje
 char msg[MSG_BUFFER_SIZE];            // Generar un arreglo para el mensaje
 
-WiFiClient espClient;
-PubSubClient client(espClient);
+//WiFiClient espClient;
+//PubSubClient client(espClient);
 TemperatureSensor sensor(20.0,30.0);
 
 void setup() {
