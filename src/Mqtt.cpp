@@ -1,4 +1,5 @@
 #include "Mqtt.h"
+
 #include <iostream>
 #include <WiFi.h>
 #include <PubSubClient.h>
@@ -38,14 +39,14 @@ void Mqtt::reconnect() { // Función para conectarse a MQTT
     }
 }
 
-void Mqtt::Mqtt_publish(float t){
+void Mqtt::MqttPublish(float t){
     char msg[MSG_BUFFER_SIZE];
     snprintf (msg, MSG_BUFFER_SIZE, "{\"dispositivo\":\"Refrigerador1\",\"tipo\":\"Temperatura\",\"dato\":%.2f}", t*1.0);
     client.publish(topico_entrada, msg);
     delay(10000); 
 }
 
-void Mqtt::Mqtt_setup(){
+void Mqtt::MqttSetup(){
     client.setServer(mqtt_server, 1883);
     //client.setCallback(callback(topic,payload,length));
 }

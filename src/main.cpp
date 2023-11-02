@@ -5,14 +5,14 @@
 #include "imagedata.h"
 #include <stdlib.h>
 #include <WiFi.h>
-#include <PubSubClient.h>
+//#include <PubSubClient.h>
 
 #include "Classes/TemperatureSensor.h"
 #include "Mqtt.h"
 
 
 void setup_wifi(); // Función para conectarse a Wi-Fi
-void callback(char*, byte*, unsigned int); // Función para procesar mensajes recibidos por MQTT
+//void callback(char*, byte*, unsigned int); // Función para procesar mensajes recibidos por MQTT
 void reconnect(); // Función para conectarse a MQTT
 float readTemp(); // Función para leer la temperatura
 
@@ -28,16 +28,17 @@ int samples[NumSamples];              // Arreglo con las muestras
 
 const char* ssid = "Totalplay-4EA5";
 const char* password =  "4EA57B68uz5tViRf";
-const char* mqtt_server = "broker.mqtt-dashboard.com";
-const char* topico_salida = "equipoPATO";
-const char* topico_entrada = "equipoPATO";
+//const char* mqtt_server = "broker.mqtt-dashboard.com";
+//const char* topico_salida = "equipoPATO";
+//const char* topico_entrada = "equipoPATO";
 
-const int MSG_BUFFER_SIZE = 80;       // Tamaño de buffer del mensaje
-char msg[MSG_BUFFER_SIZE];            // Generar un arreglo para el mensaje
+//const int MSG_BUFFER_SIZE = 80;       // Tamaño de buffer del mensaje
+//char msg[MSG_BUFFER_SIZE];            // Generar un arreglo para el mensaje
 
-//WiFiClient espClient;
-//PubSubClient client(espClient);
+
+
 TemperatureSensor sensor(20.0,30.0);
+Mqtt conexion;
 
 void setup() {
   Serial.begin(9600);
@@ -110,8 +111,7 @@ void loop() {
   //  reconnect();
   //}
   //client.loop();
-  snprintf (msg, MSG_BUFFER_SIZE, "{\"dispositivo\":\"Refrigerador 1\",\"tipo\":\"Temperatura\",\"dato\":%.2f}", t*1.0);
-  client.publish(topico_entrada, msg);
+  conexion.MqttPublish(t);
   delay(10000);  // Esperar 5 segundos antes de leer la temperatura nuevamente
 }
 
@@ -156,8 +156,8 @@ void reconnect() { // Función para conectarse a MQTT
       //client.publish("outTopic", "hello world");
       // ... and resubscribe
       //client.subscribe("inTopic");
-      client.subscribe(topico_entrada);
-      client.subscribe(topico_salida);   
+      //client.subscribe(topico_entrada);
+      //client.subscribe(topico_salida);   
     } else {
       Serial.print("Failed, rc = ");
       Serial.print(client.state());

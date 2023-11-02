@@ -18,8 +18,8 @@ class Mqtt {
 public:
     void callback(char* topic, byte* payload, unsigned int length);
     void reconnect();
-    void Mqtt_setup();
-    void Mqtt_publish(float t);
+    void MqttSetup();
+    void MqttPublish(float t);
 
 
 private:
